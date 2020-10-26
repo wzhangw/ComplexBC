@@ -177,9 +177,13 @@ BB.adjust_branch!(branch_objects::Array{SpatialBCBranch,1}) = nothing
 # This makes original apply_changes! invalid
 BB.apply_changes!(node::BB.JuMPNode) = nothing
 
+# This makes original processed! invalid
+BB.processed!(tree::BB.AbstractTree, node::BB.JuMPNode) = nothing
+
 function BB.bound!(node::BB.JuMPNode)
     model = find_root(node).model
     backtracking!(model, node)
+    JuMP.set_optimizer(model, MOSEK_OPTIMIZER)
     JuMP.optimize!(model)
     node.solution_status = JuMP.termination_status(model)
     if node.solution_status == MOI.INFEASIBLE || JuMP.dual_status(model) in [MOI.INFEASIBILITY_CERTIFICATE]
