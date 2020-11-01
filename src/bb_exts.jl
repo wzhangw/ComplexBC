@@ -183,7 +183,17 @@ BB.processed!(tree::BB.AbstractTree, node::BB.JuMPNode) = nothing
 function BB.bound!(node::BB.JuMPNode)
     model = find_root(node).model
     backtracking!(model, node)
-    JuMP.set_optimizer(model, MOSEK_OPTIMIZER)
+    # The commented part is used for debugging JuMP.optimize!(model) in environment with MosekTools@0.9.4
+    # This bug does not appear with MosekTools@0.9.3
+    # try 
+    #     JuMP.optimize!(model)
+    # catch e
+    #     println(Mosek.getbarxj(model.moi_backend.optimizer.model.task, Mosek.MSK_SOL_ITR, 1)) # MSK_SOL_ITR gives back the solution ... somehow MOSEK goes through MSK_SOL_ITG which looks for the integer solution
+    #     println(Mosek.solutiondef(model.moi_backend.optimizer.model.task, Mosek.MSK_SOL_ITR))
+    #     println(Mosek.solutiondef(model.moi_backend.optimizer.model.task, Mosek.MSK_SOL_ITG)) # This unexpectedly returns true @0.9.4
+    #     println(Mosek.solutiondef(model.moi_backend.optimizer.model.task, Mosek.MSK_SOL_BAS)) 
+    #     JuMP.write_to_file(model, "/home/weiqizhang/anl/mosek_test_model", format = MOI.FileFormats.FORMAT_SDPA)
+    # end
     JuMP.optimize!(model)
     node.solution_status = JuMP.termination_status(model)
     if node.solution_status == MOI.INFEASIBLE || JuMP.dual_status(model) in [MOI.INFEASIBILITY_CERTIFICATE]
