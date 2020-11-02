@@ -178,7 +178,9 @@ BB.adjust_branch!(branch_objects::Array{SpatialBCBranch,1}) = nothing
 BB.apply_changes!(node::BB.JuMPNode) = nothing
 
 # This makes original processed! invalid
-BB.processed!(tree::BB.AbstractTree, node::BB.JuMPNode) = nothing
+function BB.processed!(tree::BB.AbstractTree, node::BB.JuMPNode)
+    Base.push!(tree.processed, node)
+end
 
 function BB.bound!(node::BB.JuMPNode)
     model = find_root(node).model
