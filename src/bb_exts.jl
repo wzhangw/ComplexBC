@@ -203,7 +203,7 @@ function BB.bound!(node::BB.JuMPNode)
     elseif node.solution_status == MOI.DUAL_INFEASIBLE || JuMP.primal_status(model) in [MOI.INFEASIBILITY_CERTIFICATE]
         node.bound = -Inf
     elseif node.solution_status in [MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.SLOW_PROGRESS, MOI.ALMOST_OPTIMAL]
-        node.bound = JuMP.objective_value(model)
+        node.bound = max(node.bound, JuMP.objective_value(model))
         vrefs = JuMP.all_variables(model)
         for v in vrefs
             node.solution[v] = JuMP.value(v)
